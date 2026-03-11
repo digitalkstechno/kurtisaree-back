@@ -4,9 +4,15 @@ const upload = require('../middleware/uploadMiddleware'); // Import our custom m
 
 // Route for single image upload
 // 'image' is the fieldname expected in FormData from frontend
-router.post('/', upload.single('image'), (req, res) => {
+router.post('/', (req, res, next) => {
+  // Debug log
+  console.log('Upload request received');
+  console.log('Headers:', req.headers['content-type']);
+  next();
+}, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
+      console.log('Request Body:', req.body); // Check if data was sent but not as a file
       return res.status(400).send({ message: 'No file uploaded. Make sure fieldname is "image"' });
     }
 
@@ -17,7 +23,8 @@ router.post('/', upload.single('image'), (req, res) => {
       image: `/uploads/${req.file.filename}`,
     });
   } catch (error) {
-    res.status(500).send({ message: 'Server error during file upload' });
+    console.error('File Upload Route Error:', error);
+    res.status(500).send({ message: 'Server error during file upload', error: error.message });
   }
 });
 
