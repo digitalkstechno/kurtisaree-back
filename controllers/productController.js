@@ -140,10 +140,41 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// @desc    Get unique filter values for a category
+// @route   GET /api/products/filters/:category
+// @access  Public
+const getFilters = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const query = category ? { category } : {};
+
+    const fabrics = await Product.distinct('fabric', query);
+    const colors = await Product.distinct('color', query);
+    const occasions = await Product.distinct('occasion', query);
+    
+    // For kurti specific filters
+    const kurtiTypes = await Product.distinct('kurtiType', query);
+    const sleeveTypes = await Product.distinct('sleeveType', query);
+    const neckTypes = await Product.distinct('neckType', query);
+
+    res.json({
+      fabrics: fabrics.filter(Boolean),
+      colors: colors.filter(Boolean),
+      occasions: occasions.filter(Boolean),
+      kurtiTypes: kurtiTypes.filter(Boolean),
+      sleeveTypes: sleeveTypes.filter(Boolean),
+      neckTypes: neckTypes.filter(Boolean),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getProducts,
   getProductBySlug,
   createProduct,
   updateProduct,
   deleteProduct,
+  getFilters,
 };
